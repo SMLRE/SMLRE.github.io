@@ -6,6 +6,7 @@
 <title>Oluwasemilore Sadare — Data Scientist</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -130,6 +131,47 @@ body.case-open #case{display:block}
 .nextcase a{font-family:var(--serif);font-size:34px}
 .nextcase a:hover{color:var(--accent)}
 .nextcase small{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:1.5px;text-transform:uppercase;display:block}
+
+/* interactive charts */
+.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.viz-card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:20px 20px 16px;margin:0;min-width:0}
+.viz-card.wide{grid-column:1/-1}
+.viz-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.viz-head figcaption{font-weight:500;font-size:15px;color:var(--text)}
+.badge{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border-radius:999px;white-space:nowrap;border:1px solid}
+.badge.prod{color:#0ca30c;border-color:rgba(12,163,12,.45);background:rgba(12,163,12,.08)}
+.badge.syn{color:var(--muted);border-color:var(--line2)}
+.viz-ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.viz-ctl:empty{display:none}
+.viz-ctl .segs{display:flex;gap:8px;flex-wrap:wrap}
+.seg{font:500 12px var(--sans);background:none;color:var(--muted);border:1px solid var(--line2);padding:7px 13px;border-radius:999px;cursor:pointer;transition:.15s}
+.seg:hover{color:var(--text);border-color:var(--text)}
+.seg.on{background:var(--accent);border-color:var(--accent);color:#141414}
+.viz-ctl .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;width:100%;margin-top:6px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.tile small{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+.tile b{font-family:var(--serif);font-weight:400;font-size:28px;color:var(--text)}
+.slider-row{display:flex;align-items:center;gap:14px;width:100%;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.slider-row input{flex:1;min-width:160px;accent-color:var(--accent)}
+.slider-row output{color:var(--text);font-size:13px}
+.slider-row output b{color:var(--accent);font-weight:600}
+.switch{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch span{width:36px;height:20px;border-radius:999px;background:var(--line2);position:relative;transition:.2s;flex:none}
+.switch span::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--text);transition:.2s}
+.switch input:checked + span{background:var(--accent)}
+.switch input:checked + span::after{left:19px;background:#141414}
+.switch input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+.viz-canvas{position:relative;height:280px}
+.viz-canvas.tall{height:340px}
+.viz-cap{font-size:13px;color:var(--muted);margin:12px 0 6px;line-height:1.55}
+.viz-table-btn{font:500 12px var(--sans);background:none;border:0;color:var(--dim);cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:3px}
+.viz-table-btn:hover{color:var(--accent)}
+.viz-table{overflow-x:auto;margin-top:8px}
+.viz-table table{border-collapse:collapse;font-size:12px;width:100%;font-family:var(--mono)}
+.viz-table th,.viz-table td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;color:var(--muted)}
+.viz-table th:first-child,.viz-table td:first-child{text-align:left;color:var(--text)}
+@media (max-width:900px){.viz-grid{grid-template-columns:1fr}.viz-ctl .tiles{grid-template-columns:repeat(2,1fr)}}
 /* reveal */
 .rv{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease}
 .rv.in{opacity:1;transform:none}
@@ -390,7 +432,7 @@ function renderCase(p){
     <div class="meta"><div><small>Role</small><span>${p.role}</span></div><div><small>Timeline</small><span>${p.time}</span></div><div><small>Type</small><span>${p.type}</span></div><div><small>Stack</small><span>${p.stack}</span></div></div>
   </div>
   <div class="case-body">
-    <div class="toc"><a href="#${p.id}" onclick="jump(event,'b-problem')">Problem</a><a href="#${p.id}" onclick="jump(event,'b-approach')">Approach</a><a href="#${p.id}" onclick="jump(event,'b-arch')">Architecture</a><a href="#${p.id}" onclick="jump(event,'b-results')">Results</a><a href="#${p.id}" onclick="jump(event,'b-code')">Code</a></div>
+    <div class="toc"><a href="#${p.id}" onclick="jump(event,'b-problem')">Problem</a><a href="#${p.id}" onclick="jump(event,'b-approach')">Approach</a><a href="#${p.id}" onclick="jump(event,'b-arch')">Architecture</a><a href="#${p.id}" onclick="jump(event,'b-results')">Results</a>${VIZ_DEF[p.id]?`<a href="#${p.id}" onclick="jump(event,'b-charts')">Charts</a>`:''}<a href="#${p.id}" onclick="jump(event,'b-code')">Code</a></div>
     <div>
       <div class="block" id="b-problem"><div class="eyebrow">The problem</div><h3>Why it <i>mattered</i></h3><p>${p.problem}</p></div>
       <div class="block" id="b-approach"><div class="eyebrow">Approach</div><h3>What I <i>built</i></h3><ul>${p.approach.map(a=>`<li>${a}</li>`).join('')}</ul></div>
@@ -398,6 +440,7 @@ function renderCase(p){
       <div class="block" id="b-results"><div class="eyebrow">Outcome</div><h3>What <i>changed</i></h3>
         <div class="results">${p.results.map(r=>`<div class="res"><b>${r[0]}</b><span>${r[1]}</span></div>`).join('')}</div>
         <div class="note">${p.synthetic ? "" : "Headline figures are from the production project. "}No bank data is published: the public repo re-runs the full method on synthetic data. ${p.repoNote}</div></div>
+      ${vizBlock(p.id)}
       <div class="block" id="b-code"><div class="eyebrow">Code</div><h3>Run it <i>yourself</i></h3>
         <p style="margin-bottom:18px">The public repo rebuilds the full pipeline on synthetic data shaped like the original, with generic table and column names. It includes executed notebooks, figures and metrics.</p>
         <div class="repo">${p.repo}/\n${p.tree.split('\n').map(l=>'├── '+l).join('\n')}\n└── README.md</div>
@@ -407,11 +450,306 @@ function renderCase(p){
   <div class="nextcase"><div><small>Next case</small><a href="#${nx.id}">${nx.title} →</a></div><a class="back" style="margin:0" href="#work">All projects</a></div>`;
 }
 
+
+// ===================== interactive evidence charts =====================
+const VIZ = {"churn_tiers": {"labels": ["HIGH", "MEDIUM", "LOW"], "client_share": [13.1, 19.0, 67.9], "churner_share": [61.2, 15.3, 23.5], "churn_rate": [24.5, 4.2, 1.8]}, "churn_km": {"weeks": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], "HIGH": [100.0, 80.8, 80.0, 78.0, 76.7, 75.5, 75.5, 75.1, 75.1, 74.3, 74.3, 74.3, 74.3, 74.3], "MEDIUM": [100.0, 98.0, 98.0, 97.2, 96.6, 95.8, 95.0, 94.1, 91.6, 91.0, 91.0, 91.0, 91.0, 91.0], "LOW": [100.0, 99.4, 99.1, 98.7, 98.6, 98.2, 97.9, 97.5, 97.2, 96.9, 96.9, 96.9, 96.9, 96.9]}, "css_ntb": {"channel_w": [0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0], "gini": [0.321, 0.341, 0.342, 0.341, 0.339, 0.338, 0.339, 0.339, 0.335, 0.327, 0.31, 0.285, 0.261, 0.234, 0.211, 0.191, 0.17, 0.155, 0.144, 0.133, 0.113], "ceiling": 0.3395}, "css_bands": {"labels": ["Negative", "At-Risk", "Neutral", "Positive"], "rate": [47.3, 24.5, 15.6, 6.9]}, "sme_grades": {"labels": ["A", "B", "C", "D", "E"], "mean_pd": [1.8, 4.4, 8.4, 16.8, 39.1], "observed": [2.8, 2.9, 8.3, 12.2, 33.3], "loans": [354, 280, 277, 197, 66]}, "sme_mono": {"unconstrained": 15.5, "monotone": 0.0}, "sme_models": {"Logistic baseline": 0.7396, "XGBoost (unconstrained)": 0.7546, "XGBoost (monotone)": 0.7534}, "hr_hazard": {"labels": ["Pay vs grade median (+10%)", "Underpaid high performer", "Grade (per level)", "Tenure (per year)", "Age (per year)", "Months since raise (per month)", "Recent manager change", "Low rating (\u22642)"], "pct": [-33.2, -6.0, -2.7, -1.3, 0.0, 1.8, 1.9, 29.3], "p": [0.0, 0.55, 0.469, 0.246, 0.959, 0.0, 0.85, 0.003]}, "hr_triage": {"precision50": 28.0, "base": 5.5}, "fs_ablation": {"labels": ["Network & relationship", "Channel sentiment", "Balance & product", "Risk layer", "Transactional", "Geo-behavioural", "Life-stage"], "pts": [3.53, 2.97, 0.72, 0.36, 0.23, 0.23, 0.08]}, "fs_flags": {"labels": ["0 flags", "1 flag", "2 flags", "3 flags"], "rate": [1.3, 7.6, 56.2, 33.3], "n": [10377, 750, 32, 3]}, "cash_series": {"B100 \u00b7 NGN": {"unit": "NGN m", "dates": ["23 Mar", "24 Mar", "25 Mar", "26 Mar", "27 Mar", "30 Mar", "31 Mar", "01 Apr", "02 Apr", "07 Apr", "08 Apr", "09 Apr", "10 Apr", "13 Apr", "14 Apr", "15 Apr", "16 Apr", "17 Apr", "20 Apr", "21 Apr", "22 Apr", "23 Apr", "24 Apr", "27 Apr", "28 Apr", "29 Apr", "30 Apr", "04 May", "05 May", "06 May", "07 May", "08 May", "11 May", "12 May", "13 May", "14 May", "15 May", "18 May", "19 May", "20 May", "21 May", "22 May", "25 May", "26 May", "28 May", "29 May", "01 Jun", "02 Jun", "03 Jun", "04 Jun", "05 Jun", "08 Jun", "09 Jun", "10 Jun", "11 Jun", "15 Jun", "16 Jun", "17 Jun", "18 Jun", "19 Jun", "22 Jun", "23 Jun", "24 Jun", "25 Jun", "26 Jun", "29 Jun", "30 Jun"], "split": 27, "actual": [4.13, 5.41, 59.86, 77.65, 101.04, 131.05, 26.99, 39.94, 19.4, 22.33, 42.56, -22.18, -7.81, -37.41, -45.71, 36.57, 1.37, 5.73, 44.71, 40.7, -1.5, -10.87, -32.66, 56.09, -0.9, 41.31, 49.9, 6.42, -7.67, 56.45, -22.7, 76.69, 53.92, -16.37, 31.54, 1.53, -27.91, 5.86, 1.49, 14.38, 2.53, -3.96, 46.72, 47.89, 13.38, 6.52, 7.03, 76.67, -25.27, 5.17, 15.8, 21.92, 5.12, -9.9, 30.49, -13.14, -1.02, -43.72, 2.71, 25.53, -1.15, 21.68, -24.75, 65.68, 37.18, 40.87, -12.81], "prophet": [-0.97, 7.76, 8.72, 5.99, 10.0, 8.4, 4.68, 4.76, 1.26, 4.63, 2.11, -1.57, -1.27, -4.38, -0.47, 40.03, 20.99, 56.41, 53.8, 44.31, 42.38, 3.72, 2.14, 7.41, 10.02, 7.7, 9.1, -9.51, -0.57, 7.47, 7.77, 4.41, 7.84, 4.87, 0.85, 0.69, 37.65, 40.94, 38.57, 35.05], "lo": [-32.33, -23.26, -23.0, -26.33, -23.41, -22.14, -28.09, -26.81, -29.71, -29.38, -29.71, -33.51, -32.09, -35.54, -33.29, 9.87, -11.55, 25.4, 22.53, 11.25, 10.59, -27.0, -29.91, -24.8, -20.24, -23.66, -20.85, -40.3, -33.31, -23.76, -23.09, -26.08, -24.88, -27.92, -30.28, -31.25, 6.86, 9.94, 7.42, 3.33], "hi": [27.7, 39.36, 40.08, 36.51, 40.4, 39.46, 36.64, 35.78, 34.04, 36.17, 32.48, 31.38, 28.88, 28.36, 29.93, 71.72, 51.1, 84.61, 86.31, 74.67, 72.04, 34.7, 32.1, 37.11, 41.24, 38.16, 40.19, 21.42, 29.03, 40.75, 37.08, 32.99, 38.89, 35.86, 30.27, 31.4, 69.42, 72.0, 70.84, 64.09], "naive": [21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11, 7.52, -11.58, 21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11, 31.78, 7.52, 21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11, 31.78, 7.52, -11.58, 21.13, 4.11]}, "B101 \u00b7 USD": {"unit": "USD '000", "dates": ["23 Mar", "24 Mar", "25 Mar", "26 Mar", "27 Mar", "30 Mar", "31 Mar", "01 Apr", "02 Apr", "07 Apr", "08 Apr", "09 Apr", "10 Apr", "13 Apr", "14 Apr", "15 Apr", "16 Apr", "17 Apr", "20 Apr", "21 Apr", "22 Apr", "23 Apr", "24 Apr", "27 Apr", "28 Apr", "29 Apr", "30 Apr", "04 May", "05 May", "06 May", "07 May", "08 May", "11 May", "12 May", "13 May", "14 May", "15 May", "18 May", "19 May", "20 May", "21 May", "22 May", "25 May", "26 May", "28 May", "29 May", "01 Jun", "02 Jun", "03 Jun", "04 Jun", "05 Jun", "08 Jun", "09 Jun", "10 Jun", "11 Jun", "15 Jun", "16 Jun", "17 Jun", "18 Jun", "19 Jun", "22 Jun", "23 Jun", "24 Jun", "25 Jun", "26 Jun", "29 Jun", "30 Jun"], "split": 27, "actual": [-17.24, -6.7, -0.75, 11.24, -3.73, -1.35, -1.34, 16.14, -8.65, 10.37, 2.65, -11.22, 12.43, 10.8, -0.38, -2.71, -5.85, -10.3, 1.01, -8.51, -2.7, 0.82, 4.56, 1.24, 2.88, -10.84, -10.38, 8.38, 5.89, 6.53, 4.49, 7.77, -1.9, 0.02, 9.87, 0.45, -18.39, 0.72, -8.78, -0.35, -5.54, 13.5, -1.34, -8.53, -0.05, 3.67, 1.39, -1.02, 0.63, -1.62, 9.35, -10.5, -2.2, 0.57, -8.97, -13.86, -0.16, -3.9, -8.08, -0.07, -8.14, -5.36, -3.22, 4.44, -0.7, -0.27, -8.34], "prophet": [-4.13, 0.95, 1.01, 0.5, 0.28, -0.8, 0.58, 0.6, 0.04, -0.22, -1.41, -0.05, -0.03, -0.57, -0.81, -4.47, -0.22, -2.59, -8.58, -3.8, -2.15, 0.85, 0.61, 0.69, 0.54, 2.25, 2.58, 5.12, -1.8, 3.4, 3.54, 3.06, 2.85, 1.57, 2.83, 2.72, -0.67, -1.11, -2.87, -1.71], "lo": [-14.33, -9.01, -9.34, -9.69, -9.85, -10.7, -9.74, -10.06, -10.09, -9.7, -11.58, -10.64, -10.48, -10.45, -10.69, -15.18, -10.44, -12.71, -18.77, -14.47, -12.08, -9.03, -9.77, -9.43, -10.37, -8.51, -7.92, -5.03, -12.05, -7.44, -6.27, -7.25, -7.8, -8.51, -6.94, -7.06, -10.98, -11.56, -12.22, -12.07], "hi": [6.07, 11.75, 11.19, 10.22, 10.54, 9.41, 10.35, 10.24, 9.88, 10.09, 9.43, 10.43, 9.24, 10.23, 9.46, 5.95, 10.34, 7.57, 1.16, 6.49, 7.88, 10.83, 11.06, 11.05, 11.03, 12.8, 12.57, 15.7, 8.88, 13.48, 13.33, 13.32, 13.66, 12.03, 12.83, 13.67, 10.09, 10.11, 7.89, 9.17], "naive": [4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09, -7.06, 2.23, 4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09, 0.51, -7.06, 4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09, 0.51, -7.06, 2.23, 4.35, 1.09]}, "B102 \u00b7 GBP": {"unit": "GBP '000", "dates": ["23 Mar", "24 Mar", "25 Mar", "26 Mar", "27 Mar", "30 Mar", "31 Mar", "01 Apr", "02 Apr", "07 Apr", "08 Apr", "09 Apr", "10 Apr", "13 Apr", "14 Apr", "15 Apr", "16 Apr", "17 Apr", "20 Apr", "21 Apr", "22 Apr", "23 Apr", "24 Apr", "27 Apr", "28 Apr", "29 Apr", "30 Apr", "04 May", "05 May", "06 May", "07 May", "08 May", "11 May", "12 May", "13 May", "14 May", "15 May", "18 May", "19 May", "20 May", "21 May", "22 May", "25 May", "26 May", "28 May", "29 May", "01 Jun", "02 Jun", "03 Jun", "04 Jun", "05 Jun", "08 Jun", "09 Jun", "10 Jun", "11 Jun", "15 Jun", "16 Jun", "17 Jun", "18 Jun", "19 Jun", "22 Jun", "23 Jun", "24 Jun", "25 Jun", "26 Jun", "29 Jun", "30 Jun"], "split": 27, "actual": [-1.74, 8.61, -2.86, -0.58, -1.92, -3.19, -2.46, 0.15, 2.35, 1.32, -1.8, -3.45, -3.24, -0.38, -2.99, -7.19, 4.99, 2.86, 4.75, -0.7, -1.25, -5.71, -0.45, 5.45, -1.24, 2.8, -6.19, 2.88, 1.13, -0.44, -5.06, -2.84, 8.59, -6.92, -2.42, -2.21, 1.41, 0.83, -7.09, -2.96, -3.84, 1.74, 5.49, 2.69, 7.75, -2.65, -7.48, 0.92, 0.56, -1.03, -5.67, 1.15, 1.07, -1.4, -1.36, -6.58, -6.8, -2.98, 2.49, -5.86, 0.2, -0.61, 1.94, -2.01, 5.96, -2.59, -5.29], "prophet": [0.0, 1.85, 1.71, 1.13, 0.48, 1.64, 2.09, 1.8, 1.07, 0.28, 0.99, 1.31, 0.9, 0.07, -0.82, -1.64, -3.1, -1.88, -5.25, -2.42, -1.97, -0.81, -1.43, -2.09, -0.72, -0.13, -0.24, -2.52, -1.04, 0.83, 0.72, 0.17, -0.44, 0.83, 1.33, 1.09, -0.98, -1.72, -0.81, -0.43], "lo": [-4.99, -3.66, -3.23, -3.76, -4.44, -3.57, -3.25, -2.97, -4.3, -4.83, -4.22, -3.74, -3.96, -4.98, -6.08, -6.64, -8.32, -7.1, -10.48, -7.26, -7.46, -5.8, -6.7, -7.0, -5.77, -5.1, -5.27, -7.31, -6.19, -4.0, -4.14, -5.31, -5.87, -4.38, -4.02, -3.92, -6.24, -6.88, -6.1, -5.47], "hi": [5.04, 7.35, 7.0, 6.62, 5.78, 7.24, 7.48, 7.01, 6.17, 5.44, 6.02, 6.49, 5.9, 5.03, 4.25, 3.89, 2.02, 3.19, -0.24, 2.95, 3.52, 4.26, 3.39, 3.02, 4.51, 4.98, 4.95, 2.61, 4.5, 6.04, 5.75, 5.35, 4.74, 5.79, 6.34, 6.15, 4.11, 3.28, 4.19, 5.1], "naive": [3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9, -1.6, -0.28, 3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9, -1.46, -1.6, 3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9, -1.46, -1.6, -0.28, 3.27, -0.9]}}, "cash_ccy": {"labels": ["EUR", "GBP", "NGN", "USD"], "improve": [6.6, 8.1, 22.4, 9.7]}, "cri_net": {"labels": ["Lagos", "Abuja FCT", "Ogun", "Rivers", "Plateau", "Imo", "Akwa Ibom", "Benue", "Edo", "Kwara", "Kano", "Delta", "Ondo", "Enugu", "Osun", "Oyo", "Kaduna", "Anambra"], "net": [13194, 2172, 252, -392, -525, -539, -805, -811, -895, -1017, -1041, -1107, -1123, -1131, -1331, -1407, -1631, -1863]}, "cri_commuters": {"labels": ["V1 weighted blend", "Branch model", "ATM model"], "acc": [83.8, 60.7, 99.0]}, "anom": {"isolation_forest": {"alerts": 660, "precision": 0.6697, "recall": 0.6568, "f1": 0.6632}, "dbscan": {"alerts": 2010, "precision": 0.2821, "recall": 0.8425, "f1": 0.4227}, "statistical": {"alerts": 4867, "precision": 0.1118, "recall": 0.8083, "f1": 0.1964}, "ensemble_OR (original)": {"alerts": 5825, "precision": 0.1071, "recall": 0.9272, "f1": 0.1921, "auc": 0.9543}, "ensemble_2of3 (fix)": {"alerts": 1206, "precision": 0.4668, "recall": 0.8366, "f1": 0.5993, "auc": 0.9543}, "ensemble_3of3": {"alerts": 506, "precision": 0.7233, "recall": 0.5438, "f1": 0.6209, "auc": 0.9543}}, "dep_trend": {"labels": ["Jun 25", "Jul 25", "Aug 25", "Sep 25", "Oct 25", "Nov 25", "Dec 25", "Jan 26", "Feb 26", "Mar 26", "Apr 26", "May 26", "Jun 26", "Jul 26"], "with_ib": [1042.2, 1040.9, 1061.8, 1047.4, 1067.9, 1075.0, 1083.6, 1054.0, 1052.7, 1261.4, 1235.8, 1215.8, 1198.1, 1188.0], "without_ib": [862.2, 865.9, 871.8, 862.4, 872.9, 875.0, 878.6, 844.0, 837.7, 791.4, 780.8, 755.8, 748.1, 743.0], "shocks": ["Jan 26", "Mar 26"]}, "dep_segments": {"COMMERCIAL": -12.2, "CORPORATE": -18.0, "RETAIL": -0.5, "SME": 11.9, "TREASURY": -18.8}, "dep_waterfall": {"SAVINGS": {"NEW": 1.85, "GREW": 0.74, "STABLE": -0.13, "REDUCED": -4.8, "LOST": -1.26}, "CURRENT": {"NEW": 0.7, "GREW": 0.19, "STABLE": -0.07, "REDUCED": -1.9, "LOST": -0.42}, "CASA_DOM": {"NEW": 0.24, "GREW": 1.16, "STABLE": 0.01, "REDUCED": -0.01, "LOST": -0.19}}, "dep_dest_retail": {"Digital Bank A": 0.68, "Tier-1 Bank C": 0.5, "Digital Bank B": 0.48, "Tier-1 Bank D": 0.21, "Fintech Wallet F": 0.19, "Tier-2 Bank E": 0.19}, "dep_dest_all": {"Tier-1 Bank D": 29.01, "Fintech Wallet F": 18.74, "Tier-1 Bank C": 13.64, "Tier-2 Bank E": 7.73, "Digital Bank B": 2.14, "Digital Bank A": 1.68}};
+const VC = {blue:'#3987e5', orange:'#d95926', aqua:'#199e70', amber:'#E8A54B', red:'#e66767', grey:'#6B6962',
+            text:'#ECEAE4', text2:'#9A978F', grid:'#26262C', surface:'#18181C'};
+let liveCharts = [];
+
+function vizReady(){ return typeof Chart !== 'undefined'; }
+if (vizReady()) {
+  Chart.defaults.color = VC.text2;
+  Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.borderColor = VC.grid;
+  Chart.defaults.animation.duration = 500;
+  Object.assign(Chart.defaults.plugins.tooltip, {backgroundColor:'#0E0E10', borderColor:'#33333A', borderWidth:1,
+    titleColor:VC.text, bodyColor:VC.text, padding:10, cornerRadius:8, boxPadding:4, usePointStyle:true});
+  Object.assign(Chart.defaults.plugins.legend.labels, {usePointStyle:true, pointStyle:'rectRounded', boxWidth:10, boxHeight:10, padding:16});
+  Chart.defaults.plugins.legend.align = 'start';
+
+  // selective direct value labels on bars (text ink, never series colour)
+  Chart.register({id:'valueLabels', afterDatasetsDraw(chart, _a, opts){
+    if (!opts || !opts.enabled) return;
+    const {ctx} = chart; ctx.save(); ctx.font = "500 11px Inter, sans-serif"; ctx.fillStyle = VC.text;
+    chart.data.datasets.forEach((ds, di) => {
+      if (opts.datasets && !opts.datasets.includes(di)) return;
+      const meta = chart.getDatasetMeta(di); if (meta.hidden) return;
+      meta.data.forEach((el, i) => {
+        const raw = ds.data[i]; if (raw == null) return;
+        const v = Array.isArray(raw) ? raw[1] - raw[0] : raw;
+        const txt = opts.format ? opts.format(v, i, di) : v;
+        const horiz = chart.options.indexAxis === 'y';
+        if (horiz) { const neg = v < 0; ctx.textAlign = neg ? 'right' : 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText(txt, el.x + (neg ? -6 : 6), el.y); }
+        else { ctx.textAlign = 'center'; ctx.textBaseline = v < 0 ? 'top' : 'bottom';
+          const y = Array.isArray(raw) ? (v < 0 ? Math.max(el.y, el.base) + 4 : Math.min(el.y, el.base) - 4) : el.y + (v < 0 ? 4 : -4);
+          ctx.fillText(txt, el.x, y); }
+      });
+    });
+    ctx.restore();
+  }});
+  // shaded x-bands (e.g. shock months)
+  Chart.register({id:'bands', beforeDatasetsDraw(chart, _a, opts){
+    if (!opts || !opts.items || !opts.items.length) return;
+    const {ctx, chartArea:a, scales:{x}} = chart; ctx.save();
+    opts.items.forEach(b => {
+      const i = chart.data.labels.indexOf(b.at); if (i < 0) return;
+      const w = (x.getPixelForValue(1) - x.getPixelForValue(0)) * 0.8, cx = x.getPixelForValue(i);
+      ctx.fillStyle = 'rgba(230,103,103,0.14)'; ctx.fillRect(cx - w/2, a.top, w, a.bottom - a.top);
+      ctx.fillStyle = VC.text2; ctx.font = "500 10.5px Inter, sans-serif"; ctx.textAlign = 'center';
+      ctx.fillText(b.label || 'shock', cx, a.top + 12);
+    });
+    ctx.restore();
+  }});
+  // vertical marker line (forecast origin, current slider position)
+  Chart.register({id:'vline', afterDatasetsDraw(chart, _a, opts){
+    if (!opts || opts.index == null) return;
+    const {ctx, chartArea:a, scales:{x}} = chart; const px = x.getPixelForValue(opts.index);
+    ctx.save(); ctx.strokeStyle = opts.color || VC.text2; ctx.setLineDash(opts.dash || [4,4]); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+    if (opts.label) { ctx.setLineDash([]); ctx.fillStyle = VC.text2; ctx.font = "500 10.5px Inter, sans-serif";
+      const right = px > a.right - 120; ctx.textAlign = right ? 'right' : 'left'; ctx.fillText(opts.label, px + (right ? -6 : 6), a.top + 12); }
+    ctx.restore();
+  }});
+}
+
+const baseOpts = (extra = {}) => deepMerge({
+  responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
+  plugins:{legend:{display:false}},
+  scales:{x:{grid:{display:false}, ticks:{maxRotation:(window.innerWidth<640?50:0), autoSkipPadding:12, autoSkip:false}},
+          y:{grid:{color:VC.grid}, border:{display:false}, ticks:{padding:6, autoSkip:false}}}
+}, extra);
+function deepMerge(a, b){ for (const k in b){ if (b[k] && typeof b[k]==='object' && !Array.isArray(b[k]) && typeof b[k]!=='function'){ a[k]=deepMerge(a[k]||{}, b[k]); } else a[k]=b[k]; } return a; }
+const barDs = (label, data, color, extra={}) => Object.assign({label, data, backgroundColor:color, hoverBackgroundColor:color,
+  borderRadius:4, borderSkipped:'start', maxBarThickness:34, categoryPercentage:0.7, barPercentage:0.9,
+  borderColor:VC.surface, borderWidth:{left:1, right:1}}, extra);
+const lineDs = (label, data, color, extra={}) => Object.assign({label, data, borderColor:color, backgroundColor:color,
+  borderWidth:2, pointRadius:0, pointHoverRadius:5, pointHoverBorderColor:VC.surface, pointHoverBorderWidth:2, tension:0.15}, extra);
+const pct = v => `${v}%`;
+function mk(canvas, cfg){ const c = new Chart(canvas, cfg); liveCharts.push(c); return c; }
+
+// ---------- chart definitions per case study ----------
+const VIZ_DEF = {
+ 'corporate-churn': [
+  {title:'Where the churners are', badge:'syn', caption:'13% of clients sit in the High tier, but they hold 61% of the clients who actually churned. That is the case for a short outreach list.',
+   build(cv){ const d = VIZ.churn_tiers; return mk(cv, {type:'bar', data:{labels:d.labels.map(l=>l[0]+l.slice(1).toLowerCase()+' risk'),
+     datasets:[barDs('Share of clients', d.client_share, VC.blue), barDs('Share of churners', d.churner_share, VC.orange)]},
+     options: baseOpts({plugins:{legend:{display:true}, valueLabels:{enabled:true, format:v=>v+'%'},
+       tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`, afterBody:it=>`Churn rate in tier: ${d.churn_rate[it[0].dataIndex]}%`}}},
+       scales:{y:{max:80, ticks:{callback:pct}}}})}); }},
+  {title:'How fast each tier churns', badge:'syn', caption:'Kaplan–Meier retention curves for the out-of-time snapshot. The tiers separate on time-to-churn too, so High is where the urgency is.',
+   build(cv){ const d = VIZ.churn_km; return mk(cv, {type:'line', data:{labels:d.weeks.map(w=>'Wk '+w),
+     datasets:[lineDs('High', d.HIGH, VC.orange, {stepped:true}), lineDs('Medium', d.MEDIUM, VC.blue, {stepped:true}), lineDs('Low', d.LOW, VC.aqua, {stepped:true})]},
+     options: baseOpts({plugins:{legend:{display:true}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}% still active`}}},
+       scales:{x:{ticks:{autoSkip:true}}, y:{min:70, max:100, ticks:{callback:pct}, title:{display:true, text:'clients still active'}}}})}); }}
+ ],
+ 'sme-pd': [
+  {title:'Predicted vs observed default by grade', badge:'syn', caption:'Out-of-time loans. The PD tracks observed default rates from A to E. A and B are indistinguishable on this sample, so they are candidates to merge.',
+   build(cv){ const d = VIZ.sme_grades; return mk(cv, {type:'bar', data:{labels:d.labels.map(g=>'Grade '+g),
+     datasets:[barDs('Predicted PD', d.mean_pd, VC.blue), barDs('Observed default rate', d.observed, VC.orange)]},
+     options: baseOpts({plugins:{legend:{display:true}, valueLabels:{enabled:true, format:v=>v+'%'},
+       tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`, afterBody:it=>`${d.loans[it[0].dataIndex]} loans`}}},
+       scales:{y:{ticks:{callback:pct}}}})}); }},
+  {title:'PD moves that contradict credit policy', badge:'syn', caption:'Share of loans whose PD goes the wrong way when a policy feature improves (e.g. a better repayment record raising risk). Monotonic constraints remove them entirely.',
+   build(cv){ const d = VIZ.sme_mono, m = VIZ.sme_models; return mk(cv, {type:'bar', data:{labels:['Unconstrained XGBoost','Monotone XGBoost'],
+     datasets:[barDs('Policy violations', [d.unconstrained, d.monotone], [VC.grey, VC.amber], {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'},
+       tooltip:{callbacks:{label:c=>` ${c.raw}% of loans`, afterBody:it=>`Out-of-time AUC: ${it[0].dataIndex ? m['XGBoost (monotone)'] : m['XGBoost (unconstrained)']}`}}},
+       scales:{y:{max:20, ticks:{callback:pct}}}})}); }}
+ ],
+ 'hr-attrition': [
+  {title:'What multiplies the risk of leaving', badge:'syn', wide:true, caption:'Cox PH hazard ratios, shown as % change in the hazard. Faded bars are not statistically significant (p ≥ 0.05). Pay relative to grade is the biggest lever.',
+   build(cv){ const d = VIZ.hr_hazard; const col = d.pct.map((v,i)=> d.p[i] >= 0.05 ? 'rgba(107,105,98,.55)' : (v < 0 ? VC.blue : VC.red));
+     return mk(cv, {type:'bar', data:{labels:d.labels, datasets:[barDs('Change in hazard', d.pct, col, {borderSkipped:false, maxBarThickness:22})]},
+     options: baseOpts({indexAxis:'y', interaction:{mode:'nearest', axis:'y', intersect:false},
+       plugins:{valueLabels:{enabled:true, format:(v,i)=> d.p[i] < 0.05 ? (v>0?'+':'')+v+'%' : ''},
+         tooltip:{callbacks:{label:c=>` ${c.raw>0?'+':''}${c.raw}% hazard`, afterLabel:c=>` p = ${d.p[c.dataIndex]}${d.p[c.dataIndex]>=0.05?' (not significant)':''}`}}},
+       scales:{x:{grid:{color:VC.grid}, min:-50, max:50, ticks:{callback:v=>(v>0?'+':'')+v+'%'}}, y:{grid:{display:false}}}})}); }},
+  {title:'Monthly triage list vs picking at random', badge:'syn', caption:'Share of the top-50 flagged employees who actually left within 6 months, against the base rate: about 5× lift for HR business partners.',
+   build(cv){ const d = VIZ.hr_triage; return mk(cv, {type:'bar', data:{labels:['Random 50 employees','Model top-50 list'],
+     datasets:[barDs('Left within 6 months', [d.base, d.precision50], [VC.grey, VC.amber], {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'}, tooltip:{callbacks:{label:c=>` ${c.raw}% left within 6 months`}}},
+       scales:{y:{max:35, ticks:{callback:pct}}}})}); }}
+ ],
+ 'churn-feature-store': [
+  {title:'Which feature groups carry unique signal', badge:'syn', caption:'AUC points lost when each group is removed and the model retrained. Network & relationship (salary credits, money moved to own accounts elsewhere) and channel sentiment carry signal nothing else duplicates.',
+   build(cv){ const d = VIZ.fs_ablation; return mk(cv, {type:'bar', data:{labels:d.labels, datasets:[barDs('AUC points lost', d.pts, VC.amber, {borderSkipped:false, maxBarThickness:22})]},
+     options: baseOpts({indexAxis:'y', interaction:{mode:'nearest', axis:'y', intersect:false},
+       plugins:{valueLabels:{enabled:true, format:v=>v.toFixed(1)}, tooltip:{callbacks:{label:c=>` −${c.raw} AUC points without this group`}}},
+       scales:{x:{grid:{color:VC.grid}, max:4.5, title:{display:true, text:'AUC points lost'}}, y:{grid:{display:false}}}})}); }},
+  {title:'The rule layer alone already ranks risk', badge:'syn', caption:'90-day dormancy rate by number of G7 early-warning flags raised. Readable by a retention team with no model at all.',
+   build(cv){ const d = VIZ.fs_flags; const n2 = d.n[2] + (d.n[3]||0); const r2 = +(((d.rate[2]*d.n[2] + (d.rate[3]||0)*(d.n[3]||0)) / n2).toFixed(1));
+     const labels = ['0 flags','1 flag','2+ flags'], rate = [d.rate[0], d.rate[1], r2], n = [d.n[0], d.n[1], n2];
+     return mk(cv, {type:'bar', data:{labels, datasets:[barDs('Dormancy rate', rate, VC.amber, {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'}, tooltip:{callbacks:{label:c=>` ${c.raw}% went dormant`, afterLabel:c=>` ${n[c.dataIndex].toLocaleString()} customers${c.dataIndex===2?' (small sample)':''}`}}},
+       scales:{y:{ticks:{callback:pct}}}})}); }}
+ ],
+ 'cash-forecast': [
+  {title:'Backtest: forecast vs actual daily net outflow', badge:'syn', controls:'series',
+   caption:'Six weeks of history, then the May–June 2026 backtest. The amber band is Prophet’s 80% interval. Switch series to compare currencies.',
+   build(cv, ctl){ const keys = Object.keys(VIZ.cash_series);
+     ctl.innerHTML = keys.map((k,i)=>`<button class="seg${i?'':' on'}" data-k="${k}">${k}</button>`).join('');
+     const cfg = k => { const s = VIZ.cash_series[k], pad = Array(s.split).fill(null);
+       return {labels:s.dates, datasets:[
+         lineDs('Actual', s.actual, VC.text2, {borderWidth:1.5}),
+         lineDs('Prophet', pad.concat(s.prophet), VC.amber),
+         lineDs('Seasonal naive', pad.concat(s.naive), VC.blue, {borderDash:[5,4], borderWidth:1.5}),
+         lineDs('80% interval', pad.concat(s.hi), 'rgba(232,165,75,0)', {fill:'+1', backgroundColor:'rgba(232,165,75,.16)', pointHoverRadius:0}),
+         lineDs('lower', pad.concat(s.lo), 'rgba(232,165,75,0)', {pointHoverRadius:0})], unit:s.unit, split:s.split}; };
+     let cur = cfg(keys[0]);
+     const ch = mk(cv, {type:'line', data:{labels:cur.labels, datasets:cur.datasets},
+       options: baseOpts({plugins:{legend:{display:true, labels:{filter:i=>i.text!=='lower'}},
+         vline:{index:cur.split - 0.5, label:'forecast →'},
+         tooltip:{filter:i=>i.dataset.label!=='lower' && i.raw!=null, callbacks:{label:c=> c.dataset.label==='80% interval'
+           ? ` 80% interval: ${c.chart.data.datasets[4].data[c.dataIndex]} – ${c.raw}` : ` ${c.dataset.label}: ${c.raw}`}}},
+         scales:{x:{ticks:{autoSkip:true, maxTicksLimit:10}}, y:{title:{display:true, text:cur.unit}}}})});
+     ctl.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+       ctl.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+       cur = cfg(b.dataset.k); ch.data.labels = cur.labels; ch.data.datasets.forEach((ds,i)=>ds.data = cur.datasets[i].data);
+       ch.options.scales.y.title.text = cur.unit; ch.options.plugins.vline.index = cur.split - 0.5; ch.update(); });
+     return ch; }},
+  {title:'Accuracy gain over the benchmark, by currency', badge:'syn', caption:'Median reduction in error versus a same-weekday seasonal-naive forecast, across 44 branch × currency series. NGN gains most: salary month-ends and the festive season are strong, regular drivers.',
+   build(cv){ const d = VIZ.cash_ccy; return mk(cv, {type:'bar', data:{labels:d.labels, datasets:[barDs('Error reduction vs naive', d.improve, VC.amber, {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'}, tooltip:{callbacks:{label:c=>` ${c.raw}% lower MAE than seasonal naive`}}},
+       scales:{y:{ticks:{callback:pct}}}})}); }}
+ ],
+ 'channel-sentiment': [
+  {title:'Try the new-customer weights yourself', badge:'syn', controls:'slider',
+   caption:'Gini of the score against real dormancy outcomes as the channel weight changes (transaction weight = the rest). Drag the slider: production’s 80/20 sits far below the logistic ceiling, and 25/75 reaches it.',
+   build(cv, ctl){ const d = VIZ.css_ntb;
+     ctl.innerHTML = `<label class="slider-row"><span>Channel weight</span><input type="range" min="0" max="${d.channel_w.length-1}" step="1" value="16" aria-label="Channel weight"><output></output></label>`;
+     const ch = mk(cv, {type:'line', data:{labels:d.channel_w.map(w=>Math.round(w*100)+'/'+Math.round((1-w)*100)), datasets:[
+       lineDs('Gini vs dormancy', d.gini, VC.amber, {pointRadius:d.gini.map((_,i)=>i===16?6:0), pointBackgroundColor:VC.amber, pointBorderColor:VC.surface, pointBorderWidth:2}),
+       lineDs('Logistic ceiling', d.gini.map(()=>d.ceiling), VC.text2, {borderDash:[5,4], borderWidth:1.5})]},
+       options: baseOpts({plugins:{legend:{display:true}, vline:{index:16, label:'80/20 production', color:VC.red, dash:[2,3]},
+         tooltip:{callbacks:{title:it=>`Channel / transactions: ${it[0].label}`, label:c=>` ${c.dataset.label}: ${c.raw.toFixed(3)}`}}},
+         scales:{x:{title:{display:true, text:'channel / transaction weight'}, ticks:{autoSkip:true, maxTicksLimit:6}}, y:{min:0.08, max:0.38, title:{display:true, text:'Gini'}}}})});
+     const inp = ctl.querySelector('input'), out = ctl.querySelector('output');
+     const upd = () => { const i = +inp.value; const g = d.gini[i];
+       out.innerHTML = `<b>${Math.round(d.channel_w[i]*100)}/${Math.round((1-d.channel_w[i])*100)}</b> · Gini ${g.toFixed(3)} · ${Math.round(g/d.ceiling*100)}% of ceiling`;
+       ch.data.datasets[0].pointRadius = d.gini.map((_,j)=>j===i?6:0); ch.update('none'); };
+     inp.addEventListener('input', upd); upd(); return ch; }},
+  {title:'Dormancy rate by sentiment band', badge:'syn', caption:'After quantile-matched recalibration. Negative-band customers go dormant at about 7× the rate of Positive ones, so the band works as a campaign trigger.',
+   build(cv){ const d = VIZ.css_bands; return mk(cv, {type:'bar', data:{labels:d.labels,
+     datasets:[barDs('Dormant within ~11 months', d.rate, ['#e66767','#E8A54B','#8A8A8A','#199e70'], {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'}, tooltip:{callbacks:{label:c=>` ${c.raw}% went dormant`}}},
+       scales:{y:{ticks:{callback:pct}}}})}); }}
+ ],
+ 'residence-inference': [
+  {title:'1.54M customers: where they live now', badge:'prod', caption:'Production finding: 83% of customers no longer transact mainly in the state where they opened their account. Lagos absorbed a net inflow of 1.24M customers.',
+   build(cv){ return mk(cv, {type:'doughnut', data:{labels:['Relocated from opening state','Still in opening state'],
+     datasets:[{data:[83,17], backgroundColor:[VC.amber,'#33333A'], borderColor:VC.surface, borderWidth:2, hoverOffset:6}]},
+     options:{responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{legend:{display:true, position:'bottom'},
+       tooltip:{callbacks:{label:c=>` ${c.label}: ${c.raw}% (~${(1.54*c.raw/100).toFixed(2)}M customers)`}}}},
+     plugins:[{id:'center', afterDraw(ch){ const {ctx, chartArea:a} = ch; const x=(a.left+a.right)/2, y=(a.top+a.bottom)/2; ctx.save();
+       ctx.textAlign='center'; ctx.fillStyle=VC.text; ctx.font="400 40px 'Instrument Serif', serif"; ctx.fillText('83%', x, y+6);
+       ctx.fillStyle=VC.text2; ctx.font="500 11px Inter"; ctx.fillText('relocated', x, y+26); ctx.restore(); }}]}); }},
+  {title:'Net migration by state', badge:'syn', wide:true, tall:true, caption:'Synthetic reproduction, ATM residence model: customers gained (+) or lost (−) relative to account-opening state. Same shape as production, with Lagos the dominant destination.',
+   build(cv){ const d = VIZ.cri_net; return mk(cv, {type:'bar', data:{labels:d.labels,
+     datasets:[barDs('Net customers', d.net, d.net.map(v=>v>0?VC.blue:VC.red), {borderSkipped:false, maxBarThickness:14})]},
+     options: baseOpts({indexAxis:'y', interaction:{mode:'nearest', axis:'y', intersect:false},
+       plugins:{valueLabels:{enabled:true, format:(v,i)=> i<3 ? (v>0?'+':'')+v.toLocaleString() : ''}, tooltip:{callbacks:{label:c=>` ${c.raw>0?'+':''}${c.raw.toLocaleString()} customers`}}},
+       scales:{x:{grid:{color:VC.grid}, max:16000, ticks:{callback:v=>(v>0?'+':'')+(v/1000)+'k'}}, y:{grid:{display:false}, ticks:{font:{size:10.5}}}}})}); }},
+  {title:'Why branch and ATM became separate models', badge:'syn', caption:'Ogun residents who commute to Lagos, checked against the hidden true residence that synthetic data allows. ATM use is local and places them at home. Branch visits follow them to work.',
+   build(cv){ const d = VIZ.cri_commuters; return mk(cv, {type:'bar', data:{labels:d.labels, datasets:[barDs('Correctly placed in Ogun', d.acc, [VC.grey, VC.blue, VC.amber], {maxBarThickness:60})]},
+     options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>v+'%'}, tooltip:{callbacks:{label:c=>` ${c.raw}% correctly placed at home`}}},
+       scales:{y:{max:110, ticks:{callback:v=>v<=100?v+'%':''}}}})}); }}
+ ],
+ 'txn-anomaly': [
+  {title:'Same detectors, different voting rule', badge:'syn', controls:'votes',
+   caption:'Pick a rule. OR fires on any detector and drowns analysts. Requiring 2 of 3 to agree cuts alerts by 79% and raises precision 4.4×, while still catching 84% of anomalies.',
+   build(cv, ctl){ const A = VIZ.anom;
+     const rules = [['isolation_forest','Isolation Forest'],['dbscan','DBSCAN'],['statistical','Statistical'],['ensemble_OR (original)','OR (any 1)'],['ensemble_2of3 (fix)','2 of 3'],['ensemble_3of3','All 3']];
+     ctl.innerHTML = `<div class="segs">${rules.slice(3).map((r,i)=>`<button class="seg${i===1?' on':''}" data-i="${i+3}">${r[1]}</button>`).join('')}</div><div class="tiles"></div>`;
+     const sel = i => rules.map((_,j)=> j===i ? 1 : 0.35);
+     const ch = mk(cv, {type:'bar', data:{labels:rules.map(r=>r[1]), datasets:[
+       barDs('Precision', rules.map(r=>+(A[r[0]].precision*100).toFixed(1)), VC.blue), barDs('Recall', rules.map(r=>+(A[r[0]].recall*100).toFixed(1)), VC.orange)]},
+       options: baseOpts({plugins:{legend:{display:true}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.raw}%`, afterBody:it=>`${A[rules[it[0].dataIndex][0]].alerts.toLocaleString()} alerts`}}},
+         scales:{y:{max:100, ticks:{callback:pct}}}})});
+     const tiles = ctl.querySelector('.tiles');
+     const upd = i => { const r = A[rules[i][0]];
+       tiles.innerHTML = [['Alerts', r.alerts.toLocaleString()],['Precision', Math.round(r.precision*100)+'%'],['Recall', Math.round(r.recall*100)+'%'],['F1', r.f1.toFixed(2)]]
+         .map(t=>`<div class="tile"><small>${t[0]}</small><b>${t[1]}</b></div>`).join('');
+       const a = sel(i); ch.data.datasets[0].backgroundColor = a.map(x=>x===1?VC.blue:'rgba(57,135,229,.3)');
+       ch.data.datasets[1].backgroundColor = a.map(x=>x===1?VC.orange:'rgba(217,89,38,.3)'); ch.update(); };
+     ctl.querySelector('.segs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+       ctl.querySelectorAll('.seg').forEach(x=>x.classList.toggle('on', x===b)); upd(+b.dataset.i); });
+     upd(4); return ch; }}
+ ],
+ 'deposit-decline': [
+  {title:'The trap: borrowed funds hiding a shock', badge:'syn', controls:'toggle',
+   caption:'Synthetic month-end customer deposits (₦bn). Toggle the INTERBANK_FCY line: when it is included, the March shock disappears. In production, the same correction exposed March 2026 as a ~₦279B second shock.',
+   build(cv, ctl){ const d = VIZ.dep_trend;
+     ctl.innerHTML = `<label class="switch"><input type="checkbox" aria-label="Include INTERBANK_FCY"><span></span>Include INTERBANK_FCY (borrowed funds)</label>`;
+     const shocks = d.shocks.map(s=>({at:s, label:'shock'}));
+     const ch = mk(cv, {type:'line', data:{labels:d.labels, datasets:[lineDs('Customer deposits', d.without_ib, VC.amber, {pointRadius:3, pointBackgroundColor:VC.amber})]},
+       options: baseOpts({plugins:{bands:{items:shocks}, tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ₦${c.raw.toLocaleString()}bn`,
+         afterLabel:c=>{ if (!c.dataIndex) return ''; const p = c.dataset.data[c.dataIndex-1]; const dlt = (c.raw-p).toFixed(1); return ` vs prior month: ${dlt>0?'+':''}${dlt}bn`; }}}},
+         scales:{x:{ticks:{autoSkip:true}}, y:{title:{display:true, text:'₦ bn'}}}})});
+     ctl.querySelector('input').addEventListener('change', e => { const on = e.target.checked;
+       ch.data.datasets[0].data = on ? d.with_ib : d.without_ib; ch.data.datasets[0].label = on ? 'Deposits incl. borrowed funds' : 'Customer deposits';
+       ch.options.plugins.bands.items = on ? [] : shocks; ch.update(); });
+     return ch; }},
+  {title:'Retail movement waterfall, Dec 25 → Jun 26', badge:'syn', controls:'cats', wide:true,
+   caption:'Each account bucketed by how its balance moved. Most of the savings loss is REDUCED: customers still open, but moving money out. That makes it a retention conversation, not an acquisition one.',
+   build(cv, ctl){ const W = VIZ.dep_waterfall, order = ['NEW','GREW','STABLE','REDUCED','LOST'];
+     ctl.innerHTML = Object.keys(W).map((k,i)=>`<button class="seg${i?'':' on'}" data-k="${k}">${k==='CASA_DOM'?'Domiciliary':k[0]+k.slice(1).toLowerCase()}</button>`).join('');
+     const build = k => { let s = 0; const data = [], col = [];
+       order.forEach(b => { const v = W[k][b] || 0; data.push([s, s + v]); col.push(v >= 0 ? VC.blue : VC.red); s += v; });
+       data.push([0, s]); col.push(VC.grey); return {data, col}; };
+     let cur = build('SAVINGS');
+     const ch = mk(cv, {type:'bar', data:{labels:[...order, 'NET'], datasets:[barDs('Change (₦bn)', cur.data, cur.col, {borderSkipped:false, maxBarThickness:46})]},
+       options: baseOpts({plugins:{valueLabels:{enabled:true, format:v=>(v>0?'+':'')+v.toFixed(1)}, tooltip:{callbacks:{label:c=>{ const v = c.raw[1]-c.raw[0]; return ` ${v>0?'+':''}${v.toFixed(2)} ₦bn`; }}}},
+         scales:{y:{title:{display:true, text:'₦ bn'}}}})});
+     ctl.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+       ctl.querySelectorAll('button').forEach(x=>x.classList.toggle('on', x===b));
+       cur = build(b.dataset.k); ch.data.datasets[0].data = cur.data; ch.data.datasets[0].backgroundColor = cur.col; ch.data.datasets[0].hoverBackgroundColor = cur.col; ch.update(); });
+     return ch; }},
+  {title:'Where retail money went', badge:'syn', caption:'Large outward transfers from declining retail accounts, by destination. Retail leans to digital banks, while corporate money goes to tier-1 competitors: different competitors, different responses.',
+   build(cv){ const d = VIZ.dep_dest_retail; return mk(cv, {type:'bar', data:{labels:Object.keys(d), datasets:[barDs('Outflows (₦bn)', Object.values(d).map(v=>+v.toFixed(2)), VC.amber, {borderSkipped:false, maxBarThickness:20})]},
+     options: baseOpts({indexAxis:'y', interaction:{mode:'nearest', axis:'y', intersect:false}, plugins:{valueLabels:{enabled:true, format:v=>v.toFixed(1)}, tooltip:{callbacks:{label:c=>` ₦${c.raw}bn`}}},
+       scales:{x:{grid:{color:VC.grid}, title:{display:true, text:'₦ bn'}}, y:{grid:{display:false}}}})}); }}
+ ]
+};
+
+function vizBlock(id){
+  const defs = VIZ_DEF[id]; if (!defs) return '';
+  return `<div class="block" id="b-charts"><div class="eyebrow">Interactive</div><h3>See the <i>evidence</i></h3>
+    <p style="margin-bottom:22px">Hover for details, and use the controls where a chart has them. Each chart is labelled with its source: <span class="badge prod">Production</span> means real results, and <span class="badge syn">Synthetic reproduction</span> means the public repo run on synthetic data.</p>
+    <div class="viz-grid">${(()=>{ const wide = defs.map(d=> defs.length===1 || d.wide || ['series','votes','toggle'].includes(d.controls));
+      const half = wide.map((w,i)=>w?-1:i).filter(i=>i>=0); if (half.length % 2) wide[half[half.length-1]] = true; return defs.map((d,i)=>[d,i,wide[i]]); })().map(([d,i,w])=>`<figure class="viz-card${w?' wide':''}" data-i="${i}">
+      <div class="viz-head"><figcaption>${d.title}</figcaption><span class="badge ${d.badge}">${d.badge==='prod'?'Production':'Synthetic reproduction'}</span></div>
+      <div class="viz-ctl"></div>
+      <div class="viz-canvas${d.tall||d.controls==='series'||d.controls==='toggle'?' tall':''}"><canvas role="img" aria-label="${d.title}"></canvas></div>
+      <p class="viz-cap">${d.caption}</p>
+      <button class="viz-table-btn" type="button">View data table</button><div class="viz-table" hidden></div></figure>`).join('')}</div></div>`;
+}
+function tableFor(ch){
+  const ds = ch.data.datasets.filter(d=>d.label && d.label!=='lower');
+  const fmt = v => Array.isArray(v) ? (v[1]-v[0]).toFixed(2) : (v==null?'–':v);
+  return `<table><thead><tr><th></th>${ds.map(d=>`<th>${d.label}</th>`).join('')}</tr></thead><tbody>${
+    ch.data.labels.map((l,i)=>`<tr><td>${l}</td>${ds.map(d=>`<td>${fmt(d.data[i])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function mountViz(id){
+  liveCharts.forEach(c=>c.destroy()); liveCharts = [];
+  const defs = VIZ_DEF[id]; if (!defs) return;
+  document.querySelectorAll('#b-charts .viz-card').forEach(card => {
+    const d = defs[+card.dataset.i];
+    if (!vizReady()) { card.querySelector('.viz-canvas').innerHTML = '<p class="viz-cap">Charts need an internet connection to load.</p>'; return; }
+    const ch = d.build(card.querySelector('canvas'), card.querySelector('.viz-ctl'));
+    const btn = card.querySelector('.viz-table-btn'), tb = card.querySelector('.viz-table');
+    btn.addEventListener('click', () => { const open = tb.hidden; tb.hidden = !open; if (open) tb.innerHTML = tableFor(ch);
+      btn.textContent = open ? 'Hide data table' : 'View data table'; });
+  });
+}
+
 // routing
 function route(){
   const h=location.hash.slice(1), p=P.find(x=>x.id===h);
-  if(p){document.body.classList.add('case-open');renderCase(p);window.scrollTo(0,0)}
-  else{const was=document.body.classList.contains('case-open');document.body.classList.remove('case-open');
+  if(p){document.body.classList.add('case-open');renderCase(p);mountViz(p.id);window.scrollTo(0,0)}
+  else{liveCharts.forEach(c=>c.destroy());liveCharts=[];const was=document.body.classList.contains('case-open');document.body.classList.remove('case-open');
     if(h){const el=document.getElementById(h);if(el)setTimeout(()=>el.scrollIntoView({behavior:was?'auto':'smooth'}),was?30:0)}}
 }
 function goHome(e,id){e.preventDefault();if(location.hash.slice(1)===id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}else location.hash=id}
